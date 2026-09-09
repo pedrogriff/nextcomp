@@ -303,6 +303,12 @@ async function main() {
     });
     benchmarkIdMap[b.code] = created.id;
 
+    // Populate 1536-dimensional embedding column
+    const benchVector = generateMockVector(1536, vectorSeed++);
+    await prisma.$executeRawUnsafe(
+      `UPDATE "SurveyBenchmark" SET embedding = '${benchVector}'::vector WHERE id = '${created.id}'`
+    );
+
     // Map benchmark to matching JobRole
     const roleKey = `${b.familyCode}_${b.level}`;
     const roleId = createdRoles[roleKey];
