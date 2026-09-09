@@ -1,0 +1,180 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+model Organization {
+  id               String            @id @default(cuid())
+  name             String
+  slug             String            @unique
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  jobFamilies      JobFamily[]
+  salaryBands      SalaryBand[]
+  employees        Employee[]
+  compCycles       CompCycle[]
+  surveyBenchmarks SurveyBenchmark[]
+}
+
+model JobFamily {
+  id               String            @id @default(cuid())
+  organizationId   String
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name             String
+  code             String
+  description      String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  jobRoles         JobRole[]
+  salaryBands      SalaryBand[]
+  surveyBenchmarks SurveyBenchmark[]
+
+  @@unique([organizationId, code])
+}
+
+model JobRole {
+  id               String                 @id @default(cuid())
+  jobFamilyId      String
+  jobFamily        JobFamily              @relation(fields: [jobFamilyId], references: [id], onDelete: Cascade)
+  title            String
+  level            String
+  description      String?
+  responsibilities String?
+  embedding        Unsupported("vector(1536)")?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  employees        Employee[]
+  salaryBands      SalaryBand[]
+  benchmarkMappings JobBenchmarkMapping[]
+
+  @@unique([jobFamilyId, level, title])
+}
+
+model SurveyBenchmark {
+  id              String                @id @default(cuid())
+  organizationId  String?
+  organization    Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  jobFamilyId     String?
+  jobFamily       JobFamily?            @relation(fields: [jobFamilyId], references: [id], onDelete: SetNull)
+  surveyProvider  String
+  surveyCode      String
+  jobTitle        String
+  level           String
+  location        String
+  p10Base         Decimal               @db.Decimal(12, 2)
+  p25Base         Decimal               @db.Decimal(12, 2)
+  p50Base         Decimal               @db.Decimal(12, 2)
+  p75Base         Decimal               @db.Decimal(12, 2)
+  p90Base         Decimal               @db.Decimal(12, 2)
+  p50TotalCash    Decimal?              @db.Decimal(12, 2)
+  p50Equity       Decimal?              @db.Decimal(12, 2)
+  effectiveDate   DateTime
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  mappings        JobBenchmarkMapping[]
+
+  @@unique([surveyProvider, surveyCode, location])
+}
+
+model JobBenchmarkMapping {
+  id                String          @id @default(cuid())
+  jobRoleId         String
+  jobRole           JobRole         @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
+  surveyBenchmarkId String
+  surveyBenchmark   SurveyBenchmark @relation(fields: [surveyBenchmarkId], references: [id], onDelete: Cascade)
+  weight            Float           @default(1.0)
+  similarityScore   Float?
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([jobRoleId, surveyBenchmarkId])
+}
+
+model SalaryBand {
+  id             String        @id @default(cuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  jobFamilyId    String?
+  jobFamily      JobFamily?    @relation(fields: [jobFamilyId], references: [id], onDelete: SetNull)
+  jobRoleId      String?
+  jobRole        JobRole?      @relation(fields: [jobRoleId], references: [id], onDelete: SetNull)
+  level          String
+  locationTier   String
+  minBase        Decimal       @db.Decimal(12, 2)
+  midBase        Decimal       @db.Decimal(12, 2)
+  maxBase        Decimal       @db.Decimal(12, 2)
+  targetEquity   Decimal?      @db.Decimal(12, 2)
+  currency       String        @default("USD")
+  effectiveYear  Int           @default(2026)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([organizationId, level, locationTier, jobFamilyId])
+}
+
+model Employee {
+  id                 String            @id @default(cuid())
+  organizationId     String
+  organization       Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  jobRoleId          String
+  jobRole            JobRole           @relation(fields: [jobRoleId], references: [id])
+  employeeNumber     String
+  firstName          String
+  lastName           String
+  email              String
+  currentLevel       String
+  location           String
+  locationTier       String            @default("US_ZONE_1")
+  currentBase        Decimal           @db.Decimal(12, 2)
+  currentEquityUnits Int               @default(0)
+  performanceRating  String?
+  hireDate           DateTime
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  meritAllocations   MeritAllocation[]
+
+  @@unique([organizationId, employeeNumber])
+  @@unique([organizationId, email])
+}
+
+model CompCycle {
+  id                String            @id @default(cuid())
+  organizationId    String
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name              String
+  startDate         DateTime
+  endDate           DateTime
+  effectiveDate     DateTime
+  status            String            @default("DRAFT")
+  totalBudgetCash   Decimal           @db.Decimal(14, 2)
+  totalBudgetEquity Int               @default(0)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  meritAllocations  MeritAllocation[]
+}
+
+model MeritAllocation {
+  id                  String    @id @default(cuid())
+  compCycleId         String
+  compCycle           CompCycle @relation(fields: [compCycleId], references: [id], onDelete: Cascade)
+  employeeId          String
+  employee            Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  previousBase        Decimal   @db.Decimal(12, 2)
+  proposedBase        Decimal   @db.Decimal(12, 2)
+  meritIncreasePct    Decimal   @db.Decimal(5, 2)
+  promoIncreasePct    Decimal   @default(0.0) @db.Decimal(5, 2)
+  proposedEquityUnits Int       @default(0)
+  status              String    @default("SUBMITTED")
+  auditNotes          String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@unique([compCycleId, employeeId])
+}

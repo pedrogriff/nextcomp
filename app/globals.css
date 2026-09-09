@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: #0A0F1D;
+  --color-surface: #131B2E;
+  --color-border: #1E2A47;
+
+  --color-navy-canvas: #0A0F1D;
+  --color-navy-card: #131B2E;
+  --color-navy-border: #1E2A47;
+
+  --color-terminal-cyan: #00F2FE;
+  --color-growth-emerald: #00E599;
+
+  --color-cyan-accent: #00F2FE;
+  --color-emerald-accent: #00E599;
+}
+
+:root {
+  --background: #0A0F1D;
+  --foreground: #E2E8F0;
+}
+
+body {
+  background-color: #0A0F1D;
+  color: #E2E8F0;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  min-height: 100vh;
+}
