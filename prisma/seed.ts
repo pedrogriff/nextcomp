@@ -407,6 +407,78 @@ async function main() {
       rating: "EXCEEDS",
       hire: "2023-01-20",
     },
+    {
+      num: "EMP-005",
+      first: "Jordan",
+      last: "Blake",
+      email: "jordan.blake@nextcomp.local",
+      family: "ENG",
+      level: "IC1",
+      base: 98000, // ENG IC1 Min is 110,000 -> Green Circle ($12k to bring to Min)
+      equity: 5000,
+      rating: "CONSISTENTLY_MEETS",
+      hire: "2024-01-10",
+    },
+    {
+      num: "EMP-006",
+      first: "Maya",
+      last: "Patel",
+      email: "maya.patel@nextcomp.local",
+      family: "ENG",
+      level: "IC2",
+      base: 155000, // ENG IC2 Mid is 165,000 -> In Range
+      equity: 8000,
+      rating: "EXCEEDS",
+      hire: "2023-09-01",
+    },
+    {
+      num: "EMP-007",
+      first: "David",
+      last: "Kim",
+      email: "david.kim@nextcomp.local",
+      family: "PROD",
+      level: "IC2",
+      base: 125000, // PROD IC2 Min is 133,000 -> Green Circle ($8k to bring to Min)
+      equity: 9000,
+      rating: "MEETS",
+      hire: "2024-03-01",
+    },
+    {
+      num: "EMP-008",
+      first: "Rachel",
+      last: "Green",
+      email: "rachel.green@nextcomp.local",
+      family: "PROD",
+      level: "IC5",
+      base: 380000, // PROD IC5 Max is 370,500 -> Red Circle ($9,500 above Max)
+      equity: 45000,
+      rating: "STRONGLY_OUTPERFORMS",
+      hire: "2020-05-15",
+    },
+    {
+      num: "EMP-009",
+      first: "Liam",
+      last: "O'Connor",
+      email: "liam.oconnor@nextcomp.local",
+      family: "DSGN",
+      level: "IC1",
+      base: 92000, // DSGN IC1 Min is 99,000 -> Green Circle ($7k to bring to Min)
+      equity: 4000,
+      rating: "CONSISTENTLY_MEETS",
+      hire: "2024-02-15",
+    },
+    {
+      num: "EMP-010",
+      first: "Chloe",
+      last: "Bennett",
+      email: "chloe.bennett@nextcomp.local",
+      family: "DSGN",
+      level: "IC4",
+      base: 295000, // DSGN IC4 Max is 283,500 -> Red Circle ($11,500 above Max)
+      equity: 25000,
+      rating: "EXCEEDS",
+      hire: "2021-08-01",
+    },
   ];
 
   const seededEmployees = [];

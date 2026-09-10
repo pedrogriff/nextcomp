@@ -16,3 +16,18 @@
 1. Zero unnecessary libraries: Whitelist = [prisma, @trigger.dev/sdk, ai, @ai-sdk/openai, zod, lucide-react, tailwindcss].
 2. Always write unit tests in Vitest before implementing complex compensation formulas.
 3. Every long-running task (>5s) must be an asynchronous Trigger.dev task.
+
+## Feature Modules
+### Salary Range Workbench (`app/(dashboard)/bands/page.tsx`)
+- **Route**: `/bands`
+- **Data Source**: Prisma ORM (`JobFamily`, `SalaryBand`, `Employee`)
+- **Math Engine**: `lib/comp-math.ts`
+  - `calculateMinFromMidAndSpread` & `calculateMaxFromMinAndSpread`
+  - `calculateCompaRatio`, `calculateRangePenetrationPct`, `getPayCircleStatus`
+  - `calculateGreenCircleCorrectionBudget` & `calculateIncumbentImpact`
+- **Key Features**:
+  - Live adjustment of Midpoint ($) and Spread % (%) with synchronous boundary re-evaluation
+  - Incumbent Impact Summary widget tracking Green Circle headcount & correction budget, Red Circle count, and Department Compa-Ratio
+  - Interactive Incumbent Roster drilldown with real-time text search and circle status filtering
+  - Transactional persistence to PostgreSQL via Server Action (`updateSalaryBands`)
+

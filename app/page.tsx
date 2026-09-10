@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Terminal,
   ChevronRight,
@@ -76,6 +77,10 @@ export default function Home() {
           </div>
 
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-400">
+            <Link href="/bands" className="text-terminal-cyan font-mono hover:text-terminal-cyan/80 transition-colors flex items-center space-x-1">
+              <span className="text-xs">&gt;</span>
+              <span>Bands Workbench</span>
+            </Link>
             <a href="#kpis" className="hover:text-terminal-cyan transition-colors">
               Metrics
             </a>

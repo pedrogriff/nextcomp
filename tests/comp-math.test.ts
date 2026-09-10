@@ -14,6 +14,8 @@ import {
   isInRange,
   getPayCircleStatus,
   analyzeCompPosition,
+  calculateGreenCircleCorrectionBudget,
+  calculateIncumbentImpact,
 } from "../lib/comp-math";
 
 describe("Compensation Math Engine", () => {
@@ -433,6 +435,160 @@ describe("Compensation Math Engine", () => {
       // (200,000 - 180,000) / (250,000 - 180,000) * 100 = 20,000 / 70,000 * 100 = 28.57%
       expect(penetration).toBeCloseTo(28.5714, 3);
       expect(getPayCircleStatus(newBase, ic3Min, ic3Max)).toBe("IN_RANGE");
+    });
+  });
+
+  describe("7. Incumbent Impact Summary Calculations", () => {
+    const MIN = 100000;
+    const MAX = 150000;
+
+    describe("calculateGreenCircleCorrectionBudget", () => {
+      it("calculates positive correction budget when base is below minimum", () => {
+        // Base $85,000, Min $100,000 -> Needs $15,000 to bring to minimum
+        expect(calculateGreenCircleCorrectionBudget(85000, MIN)).toBe(15000);
+        expect(calculateGreenCircleCorrectionBudget(99500, MIN)).toBe(500);
+      });
+
+      it("returns 0 correction budget when base is at or above minimum", () => {
+        expect(calculateGreenCircleCorrectionBudget(MIN, MIN)).toBe(0);
+        expect(calculateGreenCircleCorrectionBudget(120000, MIN)).toBe(0);
+        expect(calculateGreenCircleCorrectionBudget(MAX, MIN)).toBe(0);
+        expect(calculateGreenCircleCorrectionBudget(180000, MIN)).toBe(0);
+      });
+
+      it("throws when inputs are invalid", () => {
+        expect(() => calculateGreenCircleCorrectionBudget(-1000, MIN)).toThrowError(
+          /Base salary cannot be negative/i
+        );
+        expect(() => calculateGreenCircleCorrectionBudget(80000, 0)).toThrowError(
+          /Minimum must be greater than zero/i
+        );
+      });
+    });
+
+    describe("calculateIncumbentImpact", () => {
+      it("correctly evaluates employees across departments, counting green/red circles and required budget", () => {
+        const mockEmployees = [
+          // Engineering
+          {
+            id: "emp-1",
+            name: "Alex Vance",
+            jobFamilyId: "eng-id",
+            jobFamilyName: "Engineering",
+            level: "IC4",
+            currentBase: 220000, // Below min 225k -> Green Circle, needs 5,000
+          },
+          {
+            id: "emp-2",
+            name: "Elena Rostova",
+            jobFamilyId: "eng-id",
+            jobFamilyName: "Engineering",
+            level: "IC3",
+            currentBase: 260000, // Above max 250k -> Red Circle
+          },
+          {
+            id: "emp-3",
+            name: "Maya Patel",
+            jobFamilyId: "eng-id",
+            jobFamilyName: "Engineering",
+            level: "IC2",
+            currentBase: 165000, // Exactly mid 165k -> In Range
+          },
+          // Product
+          {
+            id: "emp-4",
+            name: "Marcus Chen",
+            jobFamilyId: "prod-id",
+            jobFamilyName: "Product",
+            level: "IC4",
+            currentBase: 200000, // Below min 210k -> Green Circle, needs 10,000
+          },
+        ];
+
+        const mockBands: Record<string, { min: number; mid: number; max: number; spread: number }> = {
+          "eng-id_IC4": { min: 225000, mid: 265000, max: 315000, spread: 0.4 },
+          "eng-id_IC3": { min: 180000, mid: 210000, max: 250000, spread: 0.3889 },
+          "eng-id_IC2": { min: 140000, mid: 165000, max: 195000, spread: 0.3929 },
+          "prod-id_IC4": { min: 210000, mid: 250000, max: 295000, spread: 0.4048 },
+        };
+
+        const result = calculateIncumbentImpact(mockEmployees, (familyId, level) => {
+          return mockBands[`${familyId}_${level}`];
+        });
+
+        // Totals
+        expect(result.totalEmployees).toBe(4);
+        expect(result.greenCircleCount).toBe(2);
+        expect(result.greenCircleCorrectionBudget).toBe(15000); // 5,000 (emp-1) + 10,000 (emp-4)
+        expect(result.redCircleCount).toBe(1); // emp-2
+        expect(result.inRangeCount).toBe(1); // emp-3
+
+        // Compa-ratios:
+        // emp-1: 220000 / 265000 = 0.830188
+        // emp-2: 260000 / 210000 = 1.238095
+        // emp-3: 165000 / 165000 = 1.000000
+        // emp-4: 200000 / 250000 = 0.800000
+        // Total avg = (0.830188 + 1.238095 + 1.000000 + 0.800000) / 4 = 3.868283 / 4 = 0.96707
+        expect(result.averageCompaRatio).toBeCloseTo(0.9671, 3);
+
+        // Department breakdown: Engineering
+        const engDept = result.departmentMetrics["eng-id"];
+        expect(engDept).toBeDefined();
+        expect(engDept.departmentName).toBe("Engineering");
+        expect(engDept.employeeCount).toBe(3);
+        expect(engDept.greenCircleCount).toBe(1);
+        expect(engDept.greenCircleCorrectionBudget).toBe(5000);
+        expect(engDept.redCircleCount).toBe(1);
+        expect(engDept.inRangeCount).toBe(1);
+        // Eng avg compa-ratio = (0.830188 + 1.238095 + 1.000000) / 3 = 1.02276
+        expect(engDept.averageCompaRatio).toBeCloseTo(1.0228, 3);
+
+        // Department breakdown: Product
+        const prodDept = result.departmentMetrics["prod-id"];
+        expect(prodDept).toBeDefined();
+        expect(prodDept.departmentName).toBe("Product");
+        expect(prodDept.employeeCount).toBe(1);
+        expect(prodDept.greenCircleCount).toBe(1);
+        expect(prodDept.greenCircleCorrectionBudget).toBe(10000);
+        expect(prodDept.redCircleCount).toBe(0);
+        expect(prodDept.inRangeCount).toBe(0);
+        expect(prodDept.averageCompaRatio).toBeCloseTo(0.8, 4);
+      });
+
+      it("recalculates immediately when bands shift dynamically", () => {
+        const employees = [
+          {
+            id: "emp-1",
+            name: "Dev",
+            jobFamilyId: "f1",
+            jobFamilyName: "Eng",
+            level: "IC3",
+            currentBase: 200000,
+          },
+        ];
+
+        // Initial band: min 180k, mid 210k, max 250k -> In range
+        let band = { min: 180000, mid: 210000, max: 250000, spread: 0.3889 };
+        let impact = calculateIncumbentImpact(employees, () => band);
+        expect(impact.greenCircleCount).toBe(0);
+        expect(impact.greenCircleCorrectionBudget).toBe(0);
+        expect(impact.redCircleCount).toBe(0);
+        expect(impact.inRangeCount).toBe(1);
+
+        // Adjust band midpoint higher: min 210k, mid 245k, max 290k -> Dev becomes Green Circle!
+        band = { min: 210000, mid: 245000, max: 290000, spread: 0.381 };
+        impact = calculateIncumbentImpact(employees, () => band);
+        expect(impact.greenCircleCount).toBe(1);
+        expect(impact.greenCircleCorrectionBudget).toBe(10000); // 210k - 200k
+        expect(impact.redCircleCount).toBe(0);
+
+        // Adjust band midpoint lower: min 140k, mid 165k, max 195k -> Dev becomes Red Circle!
+        band = { min: 140000, mid: 165000, max: 195000, spread: 0.3929 };
+        impact = calculateIncumbentImpact(employees, () => band);
+        expect(impact.greenCircleCount).toBe(0);
+        expect(impact.greenCircleCorrectionBudget).toBe(0);
+        expect(impact.redCircleCount).toBe(1);
+      });
     });
   });
 });

@@ -383,3 +383,143 @@ export function analyzeCompPosition(
     circleStatus,
   };
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// 6. Incumbent Impact Summary Calculations
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Calculates the budget required to bring an underpaid employee up to the band minimum.
+ * Returns 0 if employee base is at or above minimum.
+ *
+ * @param base - Base salary (must be >= 0)
+ * @param min - Salary band minimum (must be > 0)
+ */
+export function calculateGreenCircleCorrectionBudget(base: number, min: number): number {
+  if (base < 0) {
+    throw new Error("Base salary cannot be negative");
+  }
+  if (min <= 0) {
+    throw new Error("Minimum must be greater than zero");
+  }
+  return base < min ? min - base : 0;
+}
+
+export interface EmployeeIncumbent {
+  id: string;
+  name: string;
+  jobFamilyId: string;
+  jobFamilyName?: string;
+  level: string;
+  currentBase: number;
+}
+
+export interface DepartmentIncumbentMetric {
+  departmentName: string;
+  employeeCount: number;
+  greenCircleCount: number;
+  greenCircleCorrectionBudget: number;
+  redCircleCount: number;
+  inRangeCount: number;
+  averageCompaRatio: number;
+}
+
+export interface IncumbentImpactResult {
+  totalEmployees: number;
+  greenCircleCount: number;
+  greenCircleCorrectionBudget: number;
+  redCircleCount: number;
+  inRangeCount: number;
+  averageCompaRatio: number;
+  departmentMetrics: Record<string, DepartmentIncumbentMetric>;
+}
+
+/**
+ * Calculates the Incumbent Impact Summary across all employees given a band lookup function.
+ * Highlights employees below Min (green circle), employees above Max (red circle),
+ * budget required for green circle corrections, and department/overall compa-ratios.
+ */
+export function calculateIncumbentImpact(
+  employees: EmployeeIncumbent[],
+  bandLookup: (
+    jobFamilyId: string,
+    level: string
+  ) =>
+    | SalaryBandBounds
+    | { min: number; mid: number; max: number; spread: number }
+    | undefined
+): IncumbentImpactResult {
+  let greenCircleCount = 0;
+  let greenCircleCorrectionBudget = 0;
+  let redCircleCount = 0;
+  let inRangeCount = 0;
+  let totalCompaRatioSum = 0;
+  let evaluatedEmployees = 0;
+
+  const departmentMetrics: Record<string, DepartmentIncumbentMetric> = {};
+
+  for (const emp of employees) {
+    const band = bandLookup(emp.jobFamilyId, emp.level);
+    if (!band) continue;
+
+    evaluatedEmployees++;
+    const deptId = emp.jobFamilyId;
+    const deptName = emp.jobFamilyName || deptId;
+
+    if (!departmentMetrics[deptId]) {
+      departmentMetrics[deptId] = {
+        departmentName: deptName,
+        employeeCount: 0,
+        greenCircleCount: 0,
+        greenCircleCorrectionBudget: 0,
+        redCircleCount: 0,
+        inRangeCount: 0,
+        averageCompaRatio: 0,
+      };
+    }
+
+    const dept = departmentMetrics[deptId];
+    dept.employeeCount++;
+
+    const compa = calculateCompaRatio(emp.currentBase, band.mid);
+    totalCompaRatioSum += compa;
+
+    if (isGreenCircle(emp.currentBase, band.min)) {
+      const budget = calculateGreenCircleCorrectionBudget(emp.currentBase, band.min);
+      greenCircleCount++;
+      greenCircleCorrectionBudget += budget;
+      dept.greenCircleCount++;
+      dept.greenCircleCorrectionBudget += budget;
+    } else if (isRedCircle(emp.currentBase, band.max)) {
+      redCircleCount++;
+      dept.redCircleCount++;
+    } else {
+      inRangeCount++;
+      dept.inRangeCount++;
+    }
+
+    // Accumulate compa-ratio in dept temporarily to average later
+    dept.averageCompaRatio += compa;
+  }
+
+  // Calculate department averages
+  for (const deptId in departmentMetrics) {
+    const dept = departmentMetrics[deptId];
+    dept.averageCompaRatio =
+      dept.employeeCount > 0 ? dept.averageCompaRatio / dept.employeeCount : 0;
+  }
+
+  const averageCompaRatio =
+    evaluatedEmployees > 0 ? totalCompaRatioSum / evaluatedEmployees : 0;
+
+  return {
+    totalEmployees: evaluatedEmployees,
+    greenCircleCount,
+    greenCircleCorrectionBudget,
+    redCircleCount,
+    inRangeCount,
+    averageCompaRatio,
+    departmentMetrics,
+  };
+}
+
