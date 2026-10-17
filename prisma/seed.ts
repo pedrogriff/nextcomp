@@ -125,15 +125,15 @@ async function main() {
   }
   console.log(`✓ 18 Job Roles created across IC1-IC6 with 1536-dim vector embeddings.`);
 
-  // 4. Create 10 Sample Radford-Style Market Benchmarks
-  const radfordBenchmarks = [
+  // 4. Create 10 Sample Market Survey Benchmarks
+  const marketBenchmarks = [
     {
-      provider: "Radford",
-      code: "RAD-SWE-P1",
+      provider: "Survey Provider A",
+      code: "SVY-SWE-P1",
       title: "Software Engineer I (P1)",
       level: "IC1",
       familyCode: "ENG",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 105000,
       p25: 120000,
       p50: 135000,
@@ -143,12 +143,12 @@ async function main() {
       equity: 35000,
     },
     {
-      provider: "Radford",
-      code: "RAD-SWE-P2",
+      provider: "Survey Provider A",
+      code: "SVY-SWE-P2",
       title: "Software Engineer II (P2)",
       level: "IC2",
       familyCode: "ENG",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 130000,
       p25: 145000,
       p50: 165000,
@@ -158,12 +158,12 @@ async function main() {
       equity: 60000,
     },
     {
-      provider: "Radford",
-      code: "RAD-SWE-P3",
+      provider: "Survey Provider A",
+      code: "SVY-SWE-P3",
       title: "Senior Software Engineer (P3)",
       level: "IC3",
       familyCode: "ENG",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 165000,
       p25: 185000,
       p50: 210000,
@@ -173,12 +173,12 @@ async function main() {
       equity: 120000,
     },
     {
-      provider: "Radford",
-      code: "RAD-SWE-P4",
+      provider: "Survey Provider A",
+      code: "SVY-SWE-P4",
       title: "Staff Software Engineer (P4)",
       level: "IC4",
       familyCode: "ENG",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 205000,
       p25: 230000,
       p50: 265000,
@@ -188,12 +188,12 @@ async function main() {
       equity: 220000,
     },
     {
-      provider: "Radford",
-      code: "RAD-SWE-P5",
+      provider: "Survey Provider A",
+      code: "SVY-SWE-P5",
       title: "Principal Software Engineer (P5)",
       level: "IC5",
       familyCode: "ENG",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 250000,
       p25: 280000,
       p50: 320000,
@@ -203,12 +203,12 @@ async function main() {
       equity: 380000,
     },
     {
-      provider: "Radford",
-      code: "RAD-SWE-P6",
+      provider: "Survey Provider A",
+      code: "SVY-SWE-P6",
       title: "Distinguished Engineer (P6)",
       level: "IC6",
       familyCode: "ENG",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 310000,
       p25: 350000,
       p50: 400000,
@@ -218,12 +218,12 @@ async function main() {
       equity: 650000,
     },
     {
-      provider: "Radford",
-      code: "RAD-PM-P3",
+      provider: "Survey Provider A",
+      code: "SVY-PM-P3",
       title: "Senior Product Manager (P3)",
       level: "IC3",
       familyCode: "PROD",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 155000,
       p25: 175000,
       p50: 198000,
@@ -233,12 +233,12 @@ async function main() {
       equity: 100000,
     },
     {
-      provider: "Radford",
-      code: "RAD-PM-P4",
+      provider: "Survey Provider A",
+      code: "SVY-PM-P4",
       title: "Staff Product Manager (P4)",
       level: "IC4",
       familyCode: "PROD",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 195000,
       p25: 220000,
       p50: 250000,
@@ -248,12 +248,12 @@ async function main() {
       equity: 190000,
     },
     {
-      provider: "Radford",
-      code: "RAD-DSGN-P3",
+      provider: "Survey Provider A",
+      code: "SVY-DSGN-P3",
       title: "Senior Product Designer (P3)",
       level: "IC3",
       familyCode: "DSGN",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 145000,
       p25: 165000,
       p50: 188000,
@@ -263,12 +263,12 @@ async function main() {
       equity: 90000,
     },
     {
-      provider: "Radford",
-      code: "RAD-DSGN-P4",
+      provider: "Survey Provider A",
+      code: "SVY-DSGN-P4",
       title: "Staff Product Designer (P4)",
       level: "IC4",
       familyCode: "DSGN",
-      location: "US-SF-Bay-Area",
+      location: "US-ZONE-A",
       p10: 185000,
       p25: 205000,
       p50: 235000,
@@ -280,7 +280,7 @@ async function main() {
   ];
 
   const benchmarkIdMap: Record<string, string> = {};
-  for (const b of radfordBenchmarks) {
+  for (const b of marketBenchmarks) {
     const family = jobFamilies[b.familyCode];
     const created = await prisma.surveyBenchmark.create({
       data: {
@@ -324,7 +324,7 @@ async function main() {
       });
     }
   }
-  console.log(`✓ 10 Radford-style SurveyBenchmarks created and mapped to JobRoles.`);
+  console.log(`✓ 10 SurveyBenchmarks created and mapped to JobRoles.`);
 
   // 5. Seed Salary Bands for all levels (US_ZONE_1)
   const salaryBandBase: Record<string, { min: number; mid: number; max: number; equity: number }> = {
@@ -368,7 +368,7 @@ async function main() {
       level: "IC4",
       base: 265000,
       equity: 15000,
-      rating: "EXCEEDS",
+      rating: "rating_4",
       hire: "2022-03-15",
     },
     {
@@ -380,7 +380,7 @@ async function main() {
       level: "IC3",
       base: 205000,
       equity: 8000,
-      rating: "STRONGLY_OUTPERFORMS",
+      rating: "rating_5",
       hire: "2023-06-01",
     },
     {
@@ -392,7 +392,7 @@ async function main() {
       level: "IC4",
       base: 245000,
       equity: 12000,
-      rating: "CONSISTENTLY_MEETS",
+      rating: "rating_3",
       hire: "2021-11-10",
     },
     {
@@ -404,7 +404,7 @@ async function main() {
       level: "IC3",
       base: 185000,
       equity: 6500,
-      rating: "EXCEEDS",
+      rating: "rating_4",
       hire: "2023-01-20",
     },
     {
@@ -416,7 +416,7 @@ async function main() {
       level: "IC1",
       base: 98000, // ENG IC1 Min is 110,000 -> Green Circle ($12k to bring to Min)
       equity: 5000,
-      rating: "CONSISTENTLY_MEETS",
+      rating: "rating_3",
       hire: "2024-01-10",
     },
     {
@@ -428,7 +428,7 @@ async function main() {
       level: "IC2",
       base: 155000, // ENG IC2 Mid is 165,000 -> In Range
       equity: 8000,
-      rating: "EXCEEDS",
+      rating: "rating_4",
       hire: "2023-09-01",
     },
     {
@@ -440,7 +440,7 @@ async function main() {
       level: "IC2",
       base: 125000, // PROD IC2 Min is 133,000 -> Green Circle ($8k to bring to Min)
       equity: 9000,
-      rating: "MEETS",
+      rating: "rating_2",
       hire: "2024-03-01",
     },
     {
@@ -452,7 +452,7 @@ async function main() {
       level: "IC5",
       base: 380000, // PROD IC5 Max is 370,500 -> Red Circle ($9,500 above Max)
       equity: 45000,
-      rating: "STRONGLY_OUTPERFORMS",
+      rating: "rating_5",
       hire: "2020-05-15",
     },
     {
@@ -464,7 +464,7 @@ async function main() {
       level: "IC1",
       base: 92000, // DSGN IC1 Min is 99,000 -> Green Circle ($7k to bring to Min)
       equity: 4000,
-      rating: "CONSISTENTLY_MEETS",
+      rating: "rating_3",
       hire: "2024-02-15",
     },
     {
@@ -476,7 +476,7 @@ async function main() {
       level: "IC4",
       base: 295000, // DSGN IC4 Max is 283,500 -> Red Circle ($11,500 above Max)
       equity: 25000,
-      rating: "EXCEEDS",
+      rating: "rating_4",
       hire: "2021-08-01",
     },
   ];
@@ -493,7 +493,7 @@ async function main() {
         lastName: emp.last,
         email: emp.email,
         currentLevel: emp.level,
-        location: "US-San-Francisco",
+        location: "US-ZONE-A",
         locationTier: "US_ZONE_1",
         currentBase: new Prisma.Decimal(emp.base),
         currentEquityUnits: emp.equity,
@@ -534,7 +534,7 @@ async function main() {
         promoIncreasePct: new Prisma.Decimal(0.0),
         proposedEquityUnits: 1500,
         status: "AUTO_APPROVED",
-        auditNotes: "Automated audit: in-band compliance confirmed against Radford P50 benchmark.",
+        auditNotes: "Automated audit: in-band compliance confirmed against survey P50 benchmark.",
       },
     });
   }

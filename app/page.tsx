@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   Terminal,
   ChevronRight,
-  TrendingUp,
   ArrowUpRight,
   Coins,
   Activity,
@@ -37,14 +36,6 @@ const KPI_DATA: KpiMetric[] = [
     deltaLabel: "parity index",
     caption: "Automated real-time audit against geo-benchmarks",
     icon: Activity,
-  },
-  {
-    title: "Retention Schedule Yield",
-    value: "33/33/22/12",
-    delta: "+14.2%",
-    deltaLabel: "talent lock-in",
-    caption: "Front-loaded vesting curve optimized for senior staff",
-    icon: TrendingUp,
   },
   {
     title: "Sim Engine Throughput",
@@ -124,7 +115,7 @@ export default function Home() {
             <div className="rounded-xl border border-navy-border bg-navy-card p-3 shadow-2xl flex items-center space-x-3 font-mono text-sm text-left group focus-within:border-terminal-cyan transition-colors">
               <span className="text-terminal-cyan font-bold select-none">&gt;</span>
               <span className="text-slate-200 flex-1 overflow-x-auto whitespace-nowrap">
-                nextcomp simulate --shares=1500 --schedule=FRONT_LOADED_33_33_22_12
+                nextcomp simulate --shares=1500 --schedule=FRONT_LOADED_35_30_20_15
               </span>
               <span className="inline-block w-2 h-4 bg-terminal-cyan animate-pulse"></span>
               <button
@@ -147,7 +138,7 @@ export default function Home() {
             <span className="text-xs font-mono text-slate-500">Auto-refreshing: 5s interval</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {KPI_DATA.map((kpi, idx) => {
               const Icon = kpi.icon;
               return (
@@ -231,14 +222,14 @@ export default function Home() {
                 <span className="text-slate-500">[10:04:14]</span>
                 <span className="text-growth-emerald font-semibold">AUDIT</span>
                 <span className="text-slate-200">
-                  Target job_level=&quot;L6&quot; location=&quot;US-MTV&quot; base_salary=$265,000 =&gt; COMPLIANT (P68)
+                  Target job_level=&quot;IC4&quot; location=&quot;US-ZONE-A&quot; base_salary=$265,000 =&gt; COMPLIANT (P68)
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-slate-500">[10:04:15]</span>
                 <span className="text-terminal-cyan font-semibold">EXEC</span>
                 <span className="text-slate-200">
-                  Schedule calculated: Y1=495 shares (33%), Y2=495 shares (33%), Y3=330 shares (22%), Y4=180 shares (12%)
+                  Schedule calculated: Y1=525 shares (35%), Y2=450 shares (30%), Y3=300 shares (20%), Y4=225 shares (15%)
                 </span>
               </div>
               <div className="flex items-center space-x-2 pt-2 border-t border-navy-border/50 text-terminal-cyan">

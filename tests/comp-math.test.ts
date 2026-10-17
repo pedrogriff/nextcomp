@@ -400,7 +400,7 @@ describe("Compensation Math Engine", () => {
     });
   });
 
-  describe("6. Real-World Enterprise Radford Benchmark Scenarios", () => {
+  describe("6. Real-World Enterprise Survey Benchmark Scenarios", () => {
     it("evaluates IC4 Staff Engineer against NextComp seeded band", () => {
       // From seed: IC4 Staff SWE has min: 225,000, mid: 265,000, max: 315,000
       const min = 225000;

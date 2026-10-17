@@ -15,7 +15,7 @@
 ## 🏛️ Core Architecture & Capabilities
 
 ### 1. Deterministic Compensation Math Engine (`lib/comp-math.ts`)
-Formally verified mathematical engine implementing standard total rewards formulas per PRD specifications:
+TypeScript functions for these standard total rewards formulas, checked by 51 unit tests in `tests/comp-math.test.ts`:
 - **Midpoint & Spread Reciprocal Invariants**:
   $$\text{Min} = \frac{\text{Mid}}{1 + \frac{\text{Spread}}{2}}, \quad \text{Max} = \text{Min} \times (1 + \text{Spread})$$
   $$\text{Spread} = \frac{\text{Max} - \text{Min}}{\text{Min}}, \quad \text{Mid} = \frac{\text{Min} + \text{Max}}{2}$$
@@ -55,7 +55,7 @@ High-throughput background task built on **Trigger.dev v3** and **Vercel AI SDK*
 
 ### 4. Relational & Vector Persistence (`prisma/schema.prisma`)
 - **PostgreSQL 16 + pgvector**: Native 1536-dim vector indexing on `JobRole` and `SurveyBenchmark`.
-- **Multi-Tenant Total Rewards Data Model**: Organizations, Job Families, Job Roles, Radford-style Survey Benchmarks, Geographic Salary Bands (`US_ZONE_1`, `US_ZONE_2`, `US_ZONE_3`), Employee Rosters, and Merit Allocation Cycles.
+- **Multi-Tenant Total Rewards Data Model**: Organizations, Job Families, Job Roles, Market Survey Benchmarks, Geographic Salary Bands (`US_ZONE_1`, `US_ZONE_2`, `US_ZONE_3`), Employee Rosters, and Merit Allocation Cycles.
 
 ---
 
@@ -69,7 +69,7 @@ pnpm test
 
 - **`tests/comp-math.test.ts`**: 51 unit tests covering spread calculations, midpoint symmetry, compa-ratio calculations, range penetration bounds, strict green/red circle inequality checks, green circle correction budget calculations, and dynamic incumbent impact evaluations.
 - **`tests/batch-job-match.test.ts`**: 5 end-to-end integration tests validating Zod payload validation, pgvector `<=>` cosine distance sorting, and database persistence.
-- **Total: 56 passing tests (100% pass rate)**.
+- **Total: 56 tests**. 5 of them need a local Postgres.
 
 ---
 
@@ -92,7 +92,7 @@ OPENAI_API_KEY="your-openai-api-key"
 # Install dependencies
 pnpm install
 
-# Run database seed (Job families, IC1-IC6 roles, Radford benchmarks, salary bands)
+# Run database seed (Job families, IC1-IC6 roles, survey benchmarks, salary bands)
 pnpm prisma db push
 pnpm prisma db seed
 ```

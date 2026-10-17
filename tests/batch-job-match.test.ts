@@ -71,7 +71,7 @@ describe("Batch Job Match Trigger.dev Task (app/trigger/batch-job-match.ts)", ()
         meetsEightyPercentRule: true,
         confidenceScore: 0.92,
         rationale:
-          "Over 85% core distributed systems engineering responsibilities align with the Radford P3 benchmark.",
+          "Over 85% core distributed systems engineering responsibilities align with the survey P3 benchmark.",
         keyMatchingDuties: ["Writes robust unit tests", "Designs scalable APIs"],
         gapOrDiscrepancies: [],
       };
